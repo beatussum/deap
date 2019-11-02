@@ -1,1 +1,4 @@
 build
+
+# Qt Creator file
+*.user
