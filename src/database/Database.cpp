@@ -27,7 +27,6 @@
 #include <QVariant>
 
 const QString Database::m_kDbName = "deap.db";
-const uint8_t Database::m_kDbVersion = 1;
 
 Database::Database()
 #ifndef BUILD_TYPE_DEBUG

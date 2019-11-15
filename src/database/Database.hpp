@@ -24,13 +24,14 @@
 
 class Database
 {
+    Q_DISABLE_COPY(Database)
+
 public:
     static const QString m_kDbName;
-    static const uint8_t m_kDbVersion;
+    static constexpr uint8_t m_kDbVersion = {1};
     enum UserType { Student, Admin };
 public:
     Database();
-    Database operator=(const Database&) = delete;
     bool init();
 
     uint8_t getDbVersion() const;

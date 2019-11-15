@@ -20,10 +20,10 @@ set(DEAP_CPP
     main.cpp
     database/Database.cpp)
 set(DEAP_HPP
-	database/Database.hpp
-	database/entities/Admin.hpp
-	database/entities/Delegate.hpp
-	database/entities/Student.hpp)
+    database/Database.hpp
+    database/entities/Admin.hpp
+    database/entities/Delegate.hpp
+    database/entities/Student.hpp)
 
 find_package(Qt5 REQUIRED
              COMPONENTS Gui Sql Widgets)
