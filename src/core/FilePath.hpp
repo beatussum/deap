@@ -16,39 +16,29 @@
  */
 
 
-#ifndef DATABASE_HPP
-#define DATABASE_HPP
+#ifndef FILEPATH_HPP
+#define FILEPATH_HPP
 
-#include <QSqlTableModel>
+#include <QIcon>
+#include <QHash>
 
-class Database
+class FilePath
 {
-    Q_DISABLE_COPY(Database)
+    Q_DISABLE_COPY(FilePath)
 
 public:
-    static const QString m_kDbName;
-    static constexpr uint8_t m_kDbVersion = {1};
-    enum UserType { Student, Admin };
-public:
-    Database();
-    bool init();
+    FilePath();
 
-    uint8_t getDbVersion() const;
-    bool isEmpty() const;
-
-    bool login(const QString& pseudo,
-               const QString& password,
-               UserType login) const;
-    bool vote(const uint8_t& id) const;
-    QSqlTableModel* getModel(UserType table) const;
-protected:
-    bool createDb() const;
+    QIcon onOffIcon(const QString& name);
+    QString getUserDataPath() const;
 private:
-    QSqlDatabase m_db;
+    QString m_userDataPath;
+    QHash<QString, QIcon> m_iconCache;
 };
 
-inline bool Database::isEmpty() const {
-    return getDbVersion() == 0;
+inline QString FilePath::getUserDataPath() const
+{
+    return m_userDataPath;
 }
 
-#endif // DATABASE_HPP
+#endif // FILEPATH_HPP

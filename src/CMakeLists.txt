@@ -14,12 +14,15 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}"
+                    "${CMAKE_CURRENT_BINARY_DIR}")
 
 set(DEAP_CPP
     main.cpp
+    core/FilePath.cpp
     database/Database.cpp)
 set(DEAP_HPP
+    core/FilePath.hpp
     database/Database.hpp
     database/entities/Admin.hpp
     database/entities/Delegate.hpp

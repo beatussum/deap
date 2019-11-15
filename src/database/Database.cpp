@@ -17,40 +17,27 @@
 
 
 #include "Database.hpp"
-#include "config-deap.hpp"
+#include "core/FilePath.hpp"
 
-#include <QStandardPaths>
-#include <QScopedPointer>
-#include <QDir>
 #include <QSqlQuery>
 #include <QCryptographicHash>
-#include <QVariant>
 
 const QString Database::m_kDbName = "deap.db";
 
 Database::Database()
-#ifndef BUILD_TYPE_DEBUG
-    : m_path(QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/")
-#endif
 {
+    QScopedPointer<FilePath> f(new FilePath());
+
     m_db = QSqlDatabase::database(QSqlDatabase::defaultConnection, false);
     if (!m_db.isValid())
         m_db = QSqlDatabase::addDatabase("QSQLITE");
 
-    m_db.setDatabaseName(m_path + m_kDbName);
+    m_db.setDatabaseName(f->getUserDataPath() + m_kDbName);
 }
 
 bool Database::init()
 {
-    bool a = true;
-
-    if (!m_path.isEmpty()) {
-        const QScopedPointer<QDir> dir(new QDir());
-        a = dir->mkpath(m_path);
-    }
-
-    if (a)
-        a = m_db.open();
+    bool a = m_db.open();
 
     if (a && isEmpty())
         a = createDb();
@@ -106,7 +93,9 @@ uint8_t Database::getDbVersion() const
     return static_cast<uint8_t>(q.value(0).toUInt());
 }
 
-bool Database::login(const QString& pseudo, const QString& password, UserType login) const
+bool Database::login(const QString& pseudo,
+                     const QString& password,
+                     UserType login) const
 {
     QSqlQuery q;
 
