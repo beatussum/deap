@@ -33,7 +33,7 @@ public:
     QString getUserDataPath() const;
 private:
     QString m_userDataPath;
-    QHash<QString, QIcon> m_iconCache;
+    static QHash<QString, QIcon> m_iconCache;
 };
 
 inline QString FilePath::getUserDataPath() const

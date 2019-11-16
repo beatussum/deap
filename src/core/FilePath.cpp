@@ -22,6 +22,8 @@
 #include <QStandardPaths>
 #include <QDir>
 
+QHash<QString, QIcon> FilePath::m_iconCache;
+
 FilePath::FilePath()
 #ifndef BUILD_TYPE_DEBUG
     : m_userDataPath(QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/")
