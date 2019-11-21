@@ -17,22 +17,28 @@
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}"
                     "${CMAKE_CURRENT_BINARY_DIR}")
 
-set(DEAP_CPP
-    main.cpp
-    core/FilePath.cpp
-    database/Database.cpp)
+set(DEAP_UI
+    gui/LoginWidget.ui)
 set(DEAP_HPP
     core/FilePath.hpp
     database/Database.hpp
     database/entities/Admin.hpp
     database/entities/Delegate.hpp
-    database/entities/Student.hpp)
+    database/entities/Student.hpp
+    gui/LoginWidget.hpp)
+set(DEAP_CPP
+    main.cpp
+    core/FilePath.cpp
+    database/Database.cpp
+    gui/LoginWidget.cpp)
 
 find_package(Qt5 REQUIRED
              COMPONENTS Gui Sql Widgets)
 
 configure_file(config-deap.hpp.in
                "${CMAKE_CURRENT_BINARY_DIR}/config-deap.hpp")
+set(CMAKE_AUTOMOC TRUE)
+set(CMAKE_AUTOUIC TRUE)
 
-add_executable(deap ${DEAP_HPP} ${DEAP_CPP})
+add_executable(deap ${DEAP_UI} ${DEAP_HPP} ${DEAP_CPP})
 target_link_libraries(deap Qt5::Gui Qt5::Sql Qt5::Widgets)
