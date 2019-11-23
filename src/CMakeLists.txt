@@ -18,19 +18,22 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}"
                     "${CMAKE_CURRENT_BINARY_DIR}")
 
 set(DEAP_UI
-    gui/LoginWidget.ui)
+    gui/LoginWidget.ui
+    gui/MainWindow.ui)
 set(DEAP_HPP
     core/FilePath.hpp
     database/Database.hpp
     database/entities/Admin.hpp
     database/entities/Delegate.hpp
     database/entities/Student.hpp
-    gui/LoginWidget.hpp)
+    gui/LoginWidget.hpp
+    gui/MainWindow.hpp)
 set(DEAP_CPP
     main.cpp
     core/FilePath.cpp
     database/Database.cpp
-    gui/LoginWidget.cpp)
+    gui/LoginWidget.cpp
+    gui/MainWindow.cpp)
 
 find_package(Qt5 REQUIRED
              COMPONENTS Gui Sql Widgets)
