@@ -19,8 +19,6 @@
 #include "LoginWidget.hpp"
 #include "core/FilePath.hpp"
 
-#include <QAction>
-
 LoginWidget::LoginWidget(QWidget* parent)
     : QWidget(parent)
     , m_ui(new Ui::LoginWidget())
@@ -28,8 +26,8 @@ LoginWidget::LoginWidget(QWidget* parent)
 {
     m_ui->setupUi(this);
 
-    const QScopedPointer<FilePath> f(new FilePath());
-    m_ui->tooglePasswordButton->setIcon(f->onOffIcon("password-show"));
+    FilePath f;
+    m_ui->tooglePasswordButton->setIcon(f.onOffIcon("password-show"));
 
     connect(m_ui->lineEditUsername, &QLineEdit::textEdited,
             this, &LoginWidget::setReadyToLogin);
@@ -45,6 +43,8 @@ LoginWidget::LoginWidget(QWidget* parent)
 
 void LoginWidget::setError(bool status)
 {
+    m_error = status;
+
     QPalette palette;
 
     if (status)
@@ -57,7 +57,7 @@ void LoginWidget::setError(bool status)
 
 void LoginWidget::setReadyToLogin()
 {
-    if (!m_error)
+    if (m_error)
         setError(false);
 
     bool a = m_ui->lineEditUsername->text().count() >= m_kMinimumSize;
@@ -89,7 +89,7 @@ void LoginWidget::tryToLogin()
 
     if (a) {
         // TODO: login success
-    } else if (!m_error) {
+    } else {
         setError(true);
     }
 }
