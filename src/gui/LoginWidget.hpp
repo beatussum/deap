@@ -20,21 +20,22 @@
 #define LOGINWIDGET_HPP
 
 #include "ui_LoginWidget.h"
-#include "database/Database.hpp"
+
+struct User;
 
 class LoginWidget final : public QWidget
 {
     Q_OBJECT
 
 public:
-    static constexpr uint8_t m_kMinimumSize = {5};
+    static constexpr uint8_t m_kMinimumSize = {4};
 public:
     explicit LoginWidget(QWidget* parent = nullptr);
     ~LoginWidget();
-
-    Database::UserType getUserType() const;
 private:
     void setError(bool status);
+signals:
+    void loginSuccess(const User&);
 private slots:
     void setReadyToLogin();
     void tooglePassword(bool checked = false);

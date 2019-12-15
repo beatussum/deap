@@ -19,16 +19,17 @@
 #ifndef DATABASE_HPP
 #define DATABASE_HPP
 
-#include <QSqlTableModel>
+#include <QtSql/QSqlDatabase>
 
-class Database
+struct User;
+
+class Database final
 {
     Q_DISABLE_COPY(Database)
 
 public:
-    static const QString m_kDbName;
+    inline static const QString m_kDbName = "deap.db";
     static constexpr uint8_t m_kDbVersion = {1};
-    enum UserType { Student, Admin };
 public:
     Database();
     bool init();
@@ -36,12 +37,10 @@ public:
     uint8_t getDbVersion() const;
     bool isEmpty() const;
 
-    bool login(const QString& pseudo,
-               const QString& password,
-               UserType login) const;
-    bool vote(const uint8_t& id) const;
-    QSqlTableModel* getModel(UserType table) const;
-protected:
+    User* login(const QString& pseudo,
+                const QString& password) const;
+    bool vote(const User& voter, const User& candidate) const;
+private:
     bool createDb() const;
 private:
     QSqlDatabase m_db;

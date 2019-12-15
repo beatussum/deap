@@ -16,17 +16,40 @@
  */
 
 
-#ifndef DELEGATE_HPP
-#define DELEGATE_HPP
+#ifndef USER_HPP
+#define USER_HPP
 
-#include <QString> 
+#include <QtGui/QPixmap>
 
-struct Student;
+struct User final
+{
+    Q_DISABLE_COPY(User)
 
-struct Delegate {
-    const uint8_t id;
-    Student* student;
-    QString* desc;
+public:
+    enum StatusFlag { Admin = 1, Candidate = 2 };
+    Q_DECLARE_FLAGS(Status, StatusFlag)
+public:
+    User(const uint16_t& id) : id(id) {}
+    ~User();
+public:
+    const uint16_t id;
+    QString firstName;
+    QString lastName;
+    QString pseudo;
+    QPixmap* avatar;
+    const User* vote;
+    QString desc;
+    Status status;
 };
 
-#endif // DELEGATE_HPP
+Q_DECLARE_OPERATORS_FOR_FLAGS(User::Status)
+
+inline User::~User() {
+    if (avatar != nullptr)
+        delete avatar;
+
+    if (vote != nullptr)
+        delete vote;
+}
+
+#endif // USER_HPP

@@ -16,17 +16,16 @@
  */
 
 
-#include "MainWindow.hpp"
+#include "gui/MainWindow.hpp"
+
 #include "gui/LoginWidget.hpp"
 
-MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent)
-    , m_ui(new Ui::MainWindow())
-    , m_loginWidget(new LoginWidget(this))
+MainWindow::MainWindow()
+    : m_ui(new Ui::MainWindow())
 {
     m_ui->setupUi(this);
 
-    setCentralWidget(m_loginWidget);
+    setCentralWidget(new LoginWidget(this));
     setStatus(Login);
 }
 

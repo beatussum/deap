@@ -16,23 +16,24 @@
  */
 
 
-#include "Database.hpp"
+#include "database/Database.hpp"
+
 #include "core/FilePath.hpp"
+#include "database/entity/User.hpp"
 
-#include <QSqlQuery>
-#include <QCryptographicHash>
-
-const QString Database::m_kDbName = "deap.db";
+#include <QtSql/QSqlQuery>
+#include <QtCore/QVariant>
+#include <QtCore/QCryptographicHash>
 
 Database::Database()
 {
-    QScopedPointer<FilePath> f(new FilePath());
+    const FilePath f;
 
     m_db = QSqlDatabase::database(QSqlDatabase::defaultConnection, false);
     if (!m_db.isValid())
         m_db = QSqlDatabase::addDatabase("QSQLITE");
 
-    m_db.setDatabaseName(f->getUserDataPath() + m_kDbName);
+    m_db.setDatabaseName(f.getUserDataPath() + m_kDbName);
 }
 
 bool Database::init()
@@ -52,32 +53,25 @@ bool Database::createDb() const
     bool a = q.exec("PRAGMA foreign_keys = ON");
     a &= q.exec("PRAGMA user_version = " + QString::number(m_kDbVersion));
 
-    a &= q.exec("CREATE TABLE student "
-                "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                "first_name TEXT NOT NULL, "
-                "last_name TEXT NOT NULL, "
-                "pseudo TEXT NOT NULL, "
-                "password INTEGER NOT NULL, "
-                "avatar BLOB, "
-                "vote INTEGER REFERENCES delegate (id) "
-                "    DEFERRABLE INITIALLY DEFERRED)");
-    a &= q.exec("CREATE UNIQUE INDEX full_name "
-                "ON student (first_name, last_name)");
-    a &= q.exec("CREATE TABLE delegate "
-                "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                "student_id INTEGER REFERENCES student (id), "
-                "desc TEXT NOT NULL)");
-    a &= q.exec("CREATE TABLE admin "
+    a &= q.exec("CREATE TABLE user "
                 "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 "first_name TEXT, "
                 "last_name TEXT, "
                 "pseudo TEXT NOT NULL, "
-                "password INTEGER NOT NULL, "
-                "avatar BLOB)");
+                "password BLOB NOT NULL, "
+                "avatar BLOB, "
+                "vote INTEGER REFERENCES user (id) "
+                "    DEFERRABLE INITIALLY DEFERRED, "
+                "desc TEXT, "
+                "status INTEGER)");
+    a &= q.exec("CREATE UNIQUE INDEX full_name "
+                "ON user (first_name, last_name)");
 
-    a &= q.prepare("INSERT INTO admin (id, pseudo, password) "
-                   "VALUES (0, 'root', ?)");
-    q.bindValue(0, QCryptographicHash::hash("root", QCryptographicHash::Sha256));
+    a &= q.prepare("INSERT OR FAIL INTO user (id, pseudo, password, status) "
+                   "VALUES (0, 'root', :password, :status)");
+    q.bindValue(":password",
+                QCryptographicHash::hash("password", QCryptographicHash::Sha256));
+    q.bindValue(":status", User::Admin);
     a &= q.exec();
 
     return a;
@@ -93,41 +87,59 @@ uint8_t Database::getDbVersion() const
     return static_cast<uint8_t>(q.value(0).toUInt());
 }
 
-bool Database::login(const QString& pseudo,
-                     const QString& password,
-                     UserType login) const
+User* Database::login(const QString& pseudo,
+                      const QString& password) const
 {
     QSqlQuery q;
 
-    QString table = (login == Student) ? "student" : "admin";
-
-    q.prepare("SELECT password FROM :table "
+    q.prepare("SELECT * FROM user "
               "WHERE pseudo = :pseudo");
-    q.bindValue(":table", table);
     q.bindValue(":pseudo", pseudo);
-    q.exec();
-    q.last();
 
-    return QCryptographicHash::hash(password.toUtf8(),
-                                    QCryptographicHash::Sha256)
-           == q.value(0).toByteArray();
+    bool ok = false;
+    if (q.exec() && q.first()) {
+        ok = QCryptographicHash::hash(password.toUtf8(),
+                                      QCryptographicHash::Sha256)
+             == q.value("password").toByteArray();
+    }
+
+    User* user = nullptr;
+    if (ok) {
+        user = new User(static_cast<uint8_t>(q.value("id").toUInt()));
+
+        user->firstName = q.value("first_name").toString();
+        user->lastName = q.value("last_name").toString();
+        user->pseudo = q.value("pseudo").toString();
+        user->desc = q.value("desc").toString();
+
+        QPixmap* pixmap = nullptr;
+        QByteArray pixmapByte = q.value("avatar").toByteArray();
+        if (!pixmapByte.isNull()) {
+            pixmap = new QPixmap();
+            pixmap->loadFromData(pixmapByte);
+        }
+        user->avatar = pixmap;
+
+        uint8_t status = static_cast<uint8_t>(q.value("status").toUInt());
+        if (status & User::Admin) {
+            user->status |= User::Admin;
+        } else if (status & User::Candidate) {
+            user->status |= User::Candidate;
+        }
+    }
+
+    return user;
 }
 
-bool Database::vote(const uint8_t& id) const
+bool Database::vote(const User& voter, const User& candidate) const
 {
     QSqlQuery q;
 
-    q.prepare("INSERT OR IGNORE INTO student (vote) "
-              "VALUES (?)");
-    q.bindValue(0, id);
+    q.prepare("INSERT OR IGNORE INTO user (vote) "
+              "VALUES (:voter) "
+              "WHERE id = :candidate");
+    q.bindValue("voter", voter.id);
+    q.bindValue("candidate", candidate.id);
 
     return q.exec();
-}
-
-QSqlTableModel* Database::getModel(UserType table) const
-{
-    QSqlTableModel* model = new QSqlTableModel();
-    model->setTable((table == Student) ? "student" : "admin");
-
-    return model;
 }

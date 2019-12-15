@@ -16,8 +16,10 @@
  */
 
 
-#include "LoginWidget.hpp"
+#include "gui/LoginWidget.hpp"
+
 #include "core/FilePath.hpp"
+#include "database/Database.hpp"
 
 LoginWidget::LoginWidget(QWidget* parent)
     : QWidget(parent)
@@ -73,22 +75,15 @@ void LoginWidget::tooglePassword(bool checked)
                                         : QLineEdit::Password);
 }
 
-Database::UserType LoginWidget::getUserType() const
-{
-    return m_ui->studentLoginRadio->isChecked()
-           ? Database::Student : Database::Admin;
-}
-
 void LoginWidget::tryToLogin()
 {
-    Database db;
+    const Database db;
 
-    bool a = db.login(m_ui->lineEditUsername->text(),
-                      m_ui->lineEditPassword->text(),
-                      getUserType());
+    User* user = db.login(m_ui->lineEditUsername->text(),
+                          m_ui->lineEditPassword->text());
 
-    if (a) {
-        // TODO: login success
+    if (user != nullptr) {
+        emit loginSuccess(*user);
     } else {
         setError(true);
     }

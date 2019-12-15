@@ -23,9 +23,7 @@ set(DEAP_UI
 set(DEAP_HPP
     core/FilePath.hpp
     database/Database.hpp
-    database/entities/Admin.hpp
-    database/entities/Delegate.hpp
-    database/entities/Student.hpp
+    database/entity/User.hpp
     gui/LoginWidget.hpp
     gui/MainWindow.hpp)
 set(DEAP_CPP

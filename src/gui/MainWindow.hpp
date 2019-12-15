@@ -31,13 +31,12 @@ public:
     inline static const QString m_kTitle = "DEAP - ";
     enum Status { Login };
 public:
-    explicit MainWindow(QWidget* parent = nullptr);
+    explicit MainWindow();
     ~MainWindow();
 private:
     void setStatus(Status);
 private:
     Ui::MainWindow *const m_ui;
-    LoginWidget* m_loginWidget;
 };
 
 inline MainWindow::~MainWindow()
