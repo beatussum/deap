@@ -16,13 +16,14 @@
  */
 
 
-#include "FilePath.hpp"
+#include "core/FilePath.hpp"
 #include "config-deap.hpp"
 
-#include <QStandardPaths>
-#include <QDir>
+#include <QtCore/QStandardPaths>
+#include <QtCore/QDir>
+#include <QtGui/QIcon>
 
-QHash<QString, QIcon> FilePath::m_iconCache;
+QCache<QString, QIcon> FilePath::m_iconCache(5);
 
 FilePath::FilePath()
 #ifndef BUILD_TYPE_DEBUG
@@ -30,25 +31,27 @@ FilePath::FilePath()
 #endif
 {
     if (!m_userDataPath.isEmpty()) {
-        const QScopedPointer<QDir> dir(new QDir());
-        dir->mkpath(m_userDataPath);
+        const QDir dir;
+        dir.mkpath(m_userDataPath);
     }
 }
 
 QIcon FilePath::onOffIcon(const QString& name)
 {
-    QIcon icon = m_iconCache.value(name);
+    QIcon* icon = m_iconCache.object(name);
 
-    if (icon.isNull()) {
-        QList<uint8_t> sizes = {16, 22, 24, 32, 64};
-        for (uint8_t i : sizes) {
-            icon.addPixmap(QIcon::fromTheme(name + "-off").pixmap(i));
-            icon.addPixmap(QIcon::fromTheme(name + "-on").pixmap(i),
+    if (icon == nullptr) {
+        icon = new QIcon();
+
+        const QList<uint8_t> sizes = {16, 22, 24, 32};
+        for (const uint8_t i : sizes) {
+            icon->addPixmap(QIcon::fromTheme(name + "-off").pixmap(i));
+            icon->addPixmap(QIcon::fromTheme(name + "-on").pixmap(i),
                            QIcon::Normal, QIcon::On);
         }
 
         m_iconCache.insert(name, icon);
     }
 
-    return icon;
+    return *icon;
 }

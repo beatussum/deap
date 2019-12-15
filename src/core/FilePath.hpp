@@ -19,10 +19,11 @@
 #ifndef FILEPATH_HPP
 #define FILEPATH_HPP
 
-#include <QIcon>
-#include <QHash>
+#include <QtCore/QCache>
 
-class FilePath
+class QIcon;
+
+class FilePath final
 {
     Q_DISABLE_COPY(FilePath)
 
@@ -33,7 +34,7 @@ public:
     QString getUserDataPath() const;
 private:
     QString m_userDataPath;
-    static QHash<QString, QIcon> m_iconCache;
+    static QCache<QString, QIcon> m_iconCache;
 };
 
 inline QString FilePath::getUserDataPath() const
